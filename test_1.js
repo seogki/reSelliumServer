@@ -4,10 +4,22 @@ var app = express();
 var bodyParser = require('body-parser');
 var url = require('url')
 var fs = require('fs');
+var request = require('request');
 var mysql = require('mysql');
 var multer = require('multer');
 var async = require('async');
+const firefox = require('selenium-webdriver/firefox');
+const {Builder, By, until} = require('selenium-webdriver');
 
+const screen = {
+  width: 640,
+  height: 480
+};
+
+var driver = new Builder()
+    .forBrowser('firefox')
+    .setFirefoxOptions(new firefox.Options().headless().windowSize(screen))
+    .build();
 
 app.use(compression());
 app.use(bodyParser.urlencoded({
@@ -20,7 +32,6 @@ function successPost(){
   var json = {result : "200"};
   return json
 }
-
 
 function errorPost(){
   var json = {
@@ -55,6 +66,103 @@ Date.prototype.yyyymmddhhmmss = function() {
   return yyyy + "-" + mm + "-" + dd + " " + hh + ":" + min + ":" + ss;
 };
 
+var download = function(uri, filename, callback){
+  request.head(uri, function(err, res, body){
+
+    saveImagetoDB("/" + filename)
+    request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
+
+  });
+};
+
+function deleteRows(){
+  con.query("DELETE FROM Images",function(err, result){
+    if(err)
+      console.log("error delete DB")
+  });
+}
+
+
+function saveImagetoDB(filePath){
+
+  var ds = new Date().yyyymmddhhmmss()
+  var param = ["PS",filePath,ds]
+  var query = "INSERT INTO Images(which,path,date) VALUES (?,?,?)"
+
+  con.query(query,param,function(err, result){
+    if(err)
+      console.log("error insert DB")
+  });
+}
+
+function getData(data,uniqueId){
+  data.forEach(function(result){
+    result.findElement(By.tagName("img")).getAttribute("src").then(function(src){
+      uniqueId++
+      download(src, "img"+uniqueId+".jpg", function(){
+        console.log("done")
+      });
+    })
+  })
+}
+
+function getRows(rows,uniqueId){
+  rows.forEach(function(row){
+    row.findElements(By.className("product-image__img product-image__img--main")).then(function(data){
+        getData(data,uniqueId)
+    })
+  })
+}
+
+// async function seleniumPs4(){
+//   deleteRows()
+//   var uniqueId = 0
+//   var ps4_xpath = '//div[@class="grid-cell-container"]'
+//   var grid_cell_className = "grid-cell-row__container"
+//   var image_product_className = "product-image__img product-image__img--main"
+//   var driver_url = 'https://store.playstation.com/ko-kr/grid/STORE-MSF86012-TOPSALESGAME/1'
+//
+//
+//
+//   driver.findElement(By.xpath(ps4_xpath)).then(function(elements){
+//     elements.findElements(By.className(grid_cell_className)).then(function(rows){
+//       getRows(rows, uniqueId)
+//     })
+//   })
+//
+//
+// }
+
+
+function seleniumPs4(){
+  deleteRows()
+  var uniqueId = 0
+  var ps4_xpath = '//div[@class="grid-cell-container"]'
+  driver.get('https://store.playstation.com/ko-kr/grid/STORE-MSF86012-TOPSALESGAME/1');
+  driver.findElement(By.xpath(ps4_xpath)).then(function(elems) {
+    elems.findElements(By.className("grid-cell-row__container")).then(function(rows){
+      for(i=0;i<rows.length;i++){
+        rows[i].findElements(By.className("product-image__img product-image__img--main")).then(function(data){
+          data.forEach(function(result){
+            result.findElement(By.tagName("img")).getAttribute("src").then(function(src){
+              uniqueId++;
+              download(src, "img"+uniqueId+".jpg", function(){
+                console.log("done")
+              });
+            })
+          })
+        })
+      }
+    })
+
+  });
+
+  driver.quit();
+}
+
+seleniumPs4();
+
+
 app.use(function (req, res, next) {
     req.connection.setNoDelay(true)
     res.header('Content-Type', 'application/json');
@@ -81,6 +189,16 @@ app.post('/main/getMainData/', function(req,res, next){
     res.send(result)
   });
 });
+
+app.post('/main/getPopularData/', function(req,res, next){
+  console.log("/main/getPopularData")
+  query = "SELECT * FROM Images ORDER BY id ASC"
+  con.query(query,function(err,result,fields){
+    if(err) return next(err);
+    res.send(result)
+  });
+});
+
 
 app.post('/game/getPs4Data/', function(req,res, next){
   console.log("/game/getPs4Data")
@@ -361,6 +479,20 @@ app.post('/game/RegisterData/', function(req,res, next){
   con.query(query,param,function(err, result){
     if(err) return next(err);
     res.json(successPost());
+  });
+});
+
+app.get('/:name',function(req,res){
+  var filename = req.params.name
+  fs.readFile(filename, function(err, content){
+    if (err) {
+      res.writeHead(400, {'Content-type':'text/html'})
+      console.log(err);
+      res.end("No such image");
+    } else {
+      res.writeHead(200,{'Content-type':'image/jpg'});
+      res.end(content);
+    }
   });
 });
 
