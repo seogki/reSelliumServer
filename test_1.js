@@ -139,7 +139,9 @@ function seleniumPs4(){
   var uniqueId = 0
   var ps4_xpath = '//div[@class="grid-cell-container"]'
   driver.get('https://store.playstation.com/ko-kr/grid/STORE-MSF86012-TOPSALESGAME/1');
+  driver.manage().timeouts().implicitlyWait(10000);
   driver.findElement(By.xpath(ps4_xpath)).then(function(elems) {
+
     elems.findElements(By.className("grid-cell-row__container")).then(function(rows){
       for(i=0;i<rows.length;i++){
         rows[i].findElements(By.className("product-image__img product-image__img--main")).then(function(data){
@@ -149,18 +151,17 @@ function seleniumPs4(){
               download(src, "img"+uniqueId+".jpg", function(){
                 console.log("done")
               });
-            })
+            });
           })
-        })
+        });
       }
-    })
-
+    });
   });
 
   driver.quit();
 }
 
-seleniumPs4();
+// seleniumPs4();
 
 
 app.use(function (req, res, next) {
@@ -479,6 +480,73 @@ app.post('/game/RegisterData/', function(req,res, next){
   con.query(query,param,function(err, result){
     if(err) return next(err);
     res.json(successPost());
+  });
+});
+
+
+app.post('/board/getBoardData/', function(req,res, next){
+  console.log("/board/getBoardData")
+  query = "SELECT * FROM Reco ORDER BY id DESC LIMIT 10"
+  con.query(query,function(err,result,fields){
+    if(err) return next(err);
+    res.send(result)
+  });
+});
+
+app.post('/board/getScrollBoardData/', function(req,res, next){
+  console.log("/board/getScrollBoardData")
+
+  var id = req.query.Id
+  query = "SELECT * FROM Reco WHERE id < ? ORDER BY id DESC LIMIT 10"
+
+  con.query(query,[id],function(err,result,fields){
+    if(err) return next(err);
+    res.send(result)
+
+  });
+});
+
+app.post('/board/getSpinnerBoardData/', function(req,res, next){
+  console.log("/board/getSpinnerBoardData")
+
+  var spinner = req.query.Spinner
+  var query;
+  if(spinner == "평점"){
+    query = "SELECT * FROM Reco ORDER BY grade DESC LIMIT 10"
+  } else if(spinner == "이름"){
+    query = "SELECT * FROM Reco ORDER BY title DESC LIMIT 10"
+  } else if(spinner == "최근 날짜"){
+    query = "SELECT * FROM Reco ORDER BY date DESC LIMIT 10"
+  } else if(spinner == "오래된 날짜"){
+    query = "SELECT * FROM Reco ORDER BY date ASC LIMIT 10"
+  }
+
+  con.query(query,function(err,result,fields){
+    if(err) return next(err);
+    res.send(result)
+  });
+});
+
+app.post('/board/getSpinnerScrollBoardData/', function(req,res, next){
+  console.log("/board/getSpinnerScrollBoardData")
+
+  var spinner = req.query.Spinner
+  var id = req.query.Id
+  var query;
+  if(spinner == "평점"){
+    query = "SELECT * FROM Reco WHERE grade < ? ORDER BY grade DESC LIMIT 10"
+  } else if(spinner == "이름"){
+    query = "SELECT * FROM Reco WHERE title < ? ORDER BY title DESC LIMIT 10"
+  } else if(spinner == "최근 날짜"){
+    query = "SELECT * FROM Reco WHERE date < ? ORDER BY date DESC LIMIT 10"
+  } else if(spinner == "오래된 날짜"){
+    query = "SELECT * FROM Reco WHERE date > ? ORDER BY date ASC LIMIT 10"
+  }
+
+  con.query(query,[id],function(err,result,fields){
+    if(err) return next(err);
+    res.send(result)
+
   });
 });
 
