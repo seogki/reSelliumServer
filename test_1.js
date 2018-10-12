@@ -191,6 +191,9 @@ app.post('/main/getMainData/', function(req,res, next){
   });
 });
 
+
+
+
 app.post('/main/getPopularData/', function(req,res, next){
   console.log("/main/getPopularData")
   query = "SELECT * FROM Images ORDER BY id ASC"
@@ -199,6 +202,46 @@ app.post('/main/getPopularData/', function(req,res, next){
     res.send(result)
   });
 });
+
+app.post('/main/getNewMainData/', function(req,res, next){
+  console.log("/main/getNewMainData")
+
+  var end = []
+
+  var f = {}
+  var s = {}
+  var t = {}
+  var key = "first"
+  o[key] = []
+  var query = "SELECT * FROM Reco ORDER BY date ASC LIMIT 3";
+  con.query(query,function(err,result,fields){
+    if(err) return next(err);
+    f["first"].push(result[0])
+    s["second"].push(result[1])
+    t["third"].push(result[2])
+    end.push(f)
+    end.push(s)
+    end.push(t)
+    res.send(end)
+  });
+});
+
+app.post('/main/getBestMainData/', function(req,res, next){
+  console.log("/main/getBestMainData")
+  var o = {};
+  var platform = req.query.Platform
+  var key = 'HoriModel';
+  var query = "SELECT * FROM Reco ORDER BY grade DESC LIMIT 3";
+  o[key] = [];
+
+
+  con.query(query,function(err,result,fields){
+    if(err) return next(err);
+    res.send(result)
+  });
+});
+
+
 
 
 app.post('/game/getPs4Data/', function(req,res, next){
@@ -549,6 +592,46 @@ app.post('/board/getSpinnerScrollBoardData/', function(req,res, next){
 
   });
 });
+
+app.post('/board/getSearchBoardData/', function(req,res, next){
+  console.log("/board/getSearchBoardData")
+
+  var search = req.query.Search
+
+  query = "SELECT * FROM Reco WHERE title LIKE ? or review LIKE ? ORDER BY id DESC LIMIT 10"
+  con.query(query,['%' + [search] + '%','%' + [search] + '%'],function(err,result,fields){
+    if(err) return next(err);
+    res.send(result)
+  });
+});
+
+app.post('/board/getSearchScrollBoardData/', function(req,res, next){
+  console.log("/board/getSearchScrollBoardData")
+
+  var search = req.query.Search
+  var id = req.query.Id
+  query = "SELECT * FROM Reco WHERE id < ? AND (title LIKE ? or review LIKE ?) ORDER BY id DESC LIMIT 10"
+
+  con.query(query,[id,'%' + [search] + '%','%' + [search] + '%'],function(err,result,fields){
+    if(err) return next(err);
+    res.send(result)
+
+  });
+});
+
+app.post('/board/registerBoardData/', function(req,res, next){
+  console.log("/board/registerBoardData")
+  var ds = new Date().yyyymmddhhmmss()
+  var param = [req.query.Title,req.query.Grade,req.query.Review, ds];
+  var query = "INSERT INTO Reco(title, grade, review, date) VALUES (?,?,?,?)"
+
+
+  con.query(query,param,function(err, result){
+    if(err) return next(err);
+    res.json(successPost());
+  });
+});
+
 
 app.get('/:name',function(req,res){
   var filename = req.params.name
