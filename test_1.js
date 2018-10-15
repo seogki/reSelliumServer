@@ -170,6 +170,40 @@ app.use(function (req, res, next) {
     next();
 });
 
+app.post('/main/getNewMainData/', function(req,res, next){
+  console.log("/main/getNewMainData")
+
+  var query = "SELECT * FROM Reco ORDER BY id DESC LIMIT 3";
+
+  con.query(query,function(err,result,fields){
+    if(err) return next(err);
+
+    res.send(result)
+  });
+});
+
+app.post('/main/getBestMainData/', function(req,res, next){
+  console.log("/main/getBestMainData")
+
+  var query = "(SELECT * FROM Reco ORDER BY date DESC) ORDER BY grade DESC LIMIT 3"
+
+  con.query(query,function(err,result,fields){
+    if(err) return next(err);
+    res.send(result)
+  });
+});
+
+app.post('/main/getWorstMainData/', function(req,res, next){
+  console.log("/main/getWorstMainData")
+
+  var query = "(SELECT * FROM Reco ORDER BY date DESC) ORDER BY grade ASC LIMIT 3"
+
+  con.query(query,function(err,result,fields){
+    if(err) return next(err);
+    res.send(result)
+  });
+});
+
 app.post('/main/getMainData/', function(req,res, next){
   console.log("/main/getMainData")
   var o = {};
@@ -178,11 +212,11 @@ app.post('/main/getMainData/', function(req,res, next){
   var query;
   o[key] = [];
   if (platform == "PS"){
-    query = "SELECT * FROM PS ORDER BY id ASC LIMIT 7"
+    query = "SELECT * FROM PS ORDER BY id DESC LIMIT 7"
   } else if (platform == "XBOX"){
-    query = "SELECT * FROM XBOX ORDER BY id ASC LIMIT 7"
+    query = "SELECT * FROM XBOX ORDER BY id DESC LIMIT 7"
   } else if (platform == "SWITCH"){
-    query = "SELECT * FROM SWITCH ORDER BY id ASC LIMIT 7"
+    query = "SELECT * FROM SWITCH ORDER BY id DESC LIMIT 7"
   }
 
   con.query(query,function(err,result,fields){
@@ -190,59 +224,6 @@ app.post('/main/getMainData/', function(req,res, next){
     res.send(result)
   });
 });
-
-
-
-
-app.post('/main/getPopularData/', function(req,res, next){
-  console.log("/main/getPopularData")
-  query = "SELECT * FROM Images ORDER BY id ASC"
-  con.query(query,function(err,result,fields){
-    if(err) return next(err);
-    res.send(result)
-  });
-});
-
-app.post('/main/getNewMainData/', function(req,res, next){
-  console.log("/main/getNewMainData")
-
-  var end = []
-
-  var f = {}
-  var s = {}
-  var t = {}
-  var key = "first"
-  o[key] = []
-  var query = "SELECT * FROM Reco ORDER BY date ASC LIMIT 3";
-  con.query(query,function(err,result,fields){
-    if(err) return next(err);
-    f["first"].push(result[0])
-    s["second"].push(result[1])
-    t["third"].push(result[2])
-    end.push(f)
-    end.push(s)
-    end.push(t)
-    res.send(end)
-  });
-});
-
-app.post('/main/getBestMainData/', function(req,res, next){
-  console.log("/main/getBestMainData")
-  var o = {};
-  var platform = req.query.Platform
-  var key = 'HoriModel';
-  var query = "SELECT * FROM Reco ORDER BY grade DESC LIMIT 3";
-  o[key] = [];
-
-
-  con.query(query,function(err,result,fields){
-    if(err) return next(err);
-    res.send(result)
-  });
-});
-
-
-
 
 app.post('/game/getPs4Data/', function(req,res, next){
   console.log("/game/getPs4Data")
