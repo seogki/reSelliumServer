@@ -212,11 +212,11 @@ app.post('/main/getMainData/', function(req,res, next){
   var query;
   o[key] = [];
   if (platform == "PS"){
-    query = "SELECT * FROM PS ORDER BY id DESC LIMIT 7"
+    query = "SELECT * FROM PS ORDER BY id DESC LIMIT 3"
   } else if (platform == "XBOX"){
-    query = "SELECT * FROM XBOX ORDER BY id DESC LIMIT 7"
+    query = "SELECT * FROM XBOX ORDER BY id DESC LIMIT 3"
   } else if (platform == "SWITCH"){
-    query = "SELECT * FROM SWITCH ORDER BY id DESC LIMIT 7"
+    query = "SELECT * FROM SWITCH ORDER BY id DESC LIMIT 3"
   }
 
   con.query(query,function(err,result,fields){
