@@ -508,6 +508,16 @@ app.post('/game/RegisterData/', function(req,res, next){
 });
 
 
+app.post('/board/getKeywordBoardData/', function(req,res, next){
+  console.log("/board/getKeywordBoardData")
+  query = "SELECT title FROM Reco ORDER BY id DESC"
+  con.query(query,function(err,result,fields){
+    if(err) return next(err);
+    res.send(result)
+  });
+});
+
+
 app.post('/board/getBoardData/', function(req,res, next){
   console.log("/board/getBoardData")
   query = "SELECT * FROM Reco ORDER BY id DESC LIMIT 10"
@@ -603,8 +613,8 @@ app.post('/board/getSearchScrollBoardData/', function(req,res, next){
 app.post('/board/registerBoardData/', function(req,res, next){
   console.log("/board/registerBoardData")
   var ds = new Date().yyyymmddhhmmss()
-  var param = [req.query.Title,req.query.Grade,req.query.Review, ds];
-  var query = "INSERT INTO Reco(title, grade, review, date) VALUES (?,?,?,?)"
+  var param = [req.query.Title,req.query.Grade,req.query.Review, ds, req.query.Platform];
+  var query = "INSERT INTO Reco(title, grade, review, date, platform) VALUES (?,?,?,?,?)"
 
 
   con.query(query,param,function(err, result){
