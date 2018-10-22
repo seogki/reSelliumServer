@@ -11,18 +11,23 @@ var async = require('async');
 
 const PORT = process.env.PORT
 
-const firefox = require('selenium-webdriver/firefox');
-const {Builder, By, until} = require('selenium-webdriver');
+// const firefox = require('selenium-webdriver/firefox');
+// const {Builder, By, until} = require('selenium-webdriver');
+
+"engines":{
+    "node": //노드 버젼 여기다 쓰세요 ,
+    "npm": //엠피엠 버젼 여기다 쓰세요
+  }
 
 const screen = {
   width: 640,
   height: 480
 };
 
-var driver = new Builder()
-    .forBrowser('firefox')
-    .setFirefoxOptions(new firefox.Options().headless().windowSize(screen))
-    .build();
+// var driver = new Builder()
+//     .forBrowser('firefox')
+//     .setFirefoxOptions(new firefox.Options().headless().windowSize(screen))
+//     .build();
 
 app.use(compression());
 app.use(bodyParser.urlencoded({
@@ -137,32 +142,32 @@ function getRows(rows,uniqueId){
 // }
 
 
-function seleniumPs4(){
-  deleteRows()
-  var uniqueId = 0
-  var ps4_xpath = '//div[@class="grid-cell-container"]'
-  driver.get('https://store.playstation.com/ko-kr/grid/STORE-MSF86012-TOPSALESGAME/1');
-  driver.manage().timeouts().implicitlyWait(10000);
-  driver.findElement(By.xpath(ps4_xpath)).then(function(elems) {
-
-    elems.findElements(By.className("grid-cell-row__container")).then(function(rows){
-      for(i=0;i<rows.length;i++){
-        rows[i].findElements(By.className("product-image__img product-image__img--main")).then(function(data){
-          data.forEach(function(result){
-            result.findElement(By.tagName("img")).getAttribute("src").then(function(src){
-              uniqueId++;
-              download(src, "img"+uniqueId+".jpg", function(){
-                console.log("done")
-              });
-            });
-          })
-        });
-      }
-    });
-  });
-
-  driver.quit();
-}
+// function seleniumPs4(){
+//   deleteRows()
+//   var uniqueId = 0
+//   var ps4_xpath = '//div[@class="grid-cell-container"]'
+//   driver.get('https://store.playstation.com/ko-kr/grid/STORE-MSF86012-TOPSALESGAME/1');
+//   driver.manage().timeouts().implicitlyWait(10000);
+//   driver.findElement(By.xpath(ps4_xpath)).then(function(elems) {
+//
+//     elems.findElements(By.className("grid-cell-row__container")).then(function(rows){
+//       for(i=0;i<rows.length;i++){
+//         rows[i].findElements(By.className("product-image__img product-image__img--main")).then(function(data){
+//           data.forEach(function(result){
+//             result.findElement(By.tagName("img")).getAttribute("src").then(function(src){
+//               uniqueId++;
+//               download(src, "img"+uniqueId+".jpg", function(){
+//                 console.log("done")
+//               });
+//             });
+//           })
+//         });
+//       }
+//     });
+//   });
+//
+//   driver.quit();
+// }
 
 // seleniumPs4();
 
