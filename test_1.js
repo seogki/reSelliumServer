@@ -14,11 +14,6 @@ const PORT = process.env.PORT
 // const firefox = require('selenium-webdriver/firefox');
 // const {Builder, By, until} = require('selenium-webdriver');
 
-"engines":{
-    "node": //노드 버젼 여기다 쓰세요 ,
-    "npm": //엠피엠 버젼 여기다 쓰세요
-  }
-
 const screen = {
   width: 640,
   height: 480
