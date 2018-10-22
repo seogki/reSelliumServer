@@ -8,6 +8,9 @@ var request = require('request');
 var mysql = require('mysql');
 var multer = require('multer');
 var async = require('async');
+
+const PORT = process.env.PORT
+
 const firefox = require('selenium-webdriver/firefox');
 const {Builder, By, until} = require('selenium-webdriver');
 
@@ -623,6 +626,19 @@ app.post('/board/registerBoardData/', function(req,res, next){
   });
 });
 
+app.post('/normal/setReport/', function(req,res, next){
+  console.log("/normal/setReport")
+  var param = [req.query.Platform, req.query.Curid, req.query.Title, req.query.Date];
+  var query = "INSERT INTO REPORT(platform, curid, title, date) VALUES (?,?,?,?)"
+
+
+  con.query(query,param,function(err, result){
+    if(err) return next(err);
+    res.json(successPost());
+  });
+});
+
+
 
 app.get('/:name',function(req,res){
   var filename = req.params.name
@@ -643,4 +659,5 @@ app.use(function(err, req, res, next){
   res.send({ message : error.message })
 });
 
-app.listen(6327);
+app.listen(PORT);
+// app.listen(6327);
