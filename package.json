@@ -18,13 +18,18 @@
     "mysql": "^2.15.0",
     "redis": "^2.8.0",
     "selenium-webdriver": "^3.6.0",
-    "sharp": "^0.20.5"
+    "sharp": "^0.20.5",
+    "engines": {
+      "node": "8.11.3",
+      "npm": "6.2.0"
+    }
   },
   "devDependencies": {},
   "scripts": {
     "start" : "node test_1.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+
   "author": "",
   "license": "ISC"
 }
