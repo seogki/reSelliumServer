@@ -25,6 +25,10 @@
     "start" : "node test_1.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "engines": {
+    "node": "8.11.3",
+    "npm": "6.2.0"
+  },
   "author": "",
   "license": "ISC"
 }
