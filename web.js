@@ -9,20 +9,6 @@ var mysql = require('mysql');
 var multer = require('multer');
 var async = require('async');
 
-const PORT = process.env.PORT
-
-// const firefox = require('selenium-webdriver/firefox');
-// const {Builder, By, until} = require('selenium-webdriver');
-
-const screen = {
-  width: 640,
-  height: 480
-};
-
-// var driver = new Builder()
-//     .forBrowser('firefox')
-//     .setFirefoxOptions(new firefox.Options().headless().windowSize(screen))
-//     .build();
 
 app.use(compression());
 app.use(bodyParser.urlencoded({
@@ -72,111 +58,6 @@ Date.prototype.yyyymmddhhmmss = function() {
   var ss = this.getSeconds() < 10 ? "0" + this.getSeconds() : this.getSeconds();
   return yyyy + "-" + mm + "-" + dd + " " + hh + ":" + min + ":" + ss;
 };
-
-var download = function(uri, filename, callback){
-  request.head(uri, function(err, res, body){
-
-    saveImagetoDB("/" + filename)
-    request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
-
-  });
-};
-
-function deleteRows(){
-  con.query("DELETE FROM Images",function(err, result){
-    if(err)
-      console.log("error delete DB")
-  });
-}
-
-
-function saveImagetoDB(filePath){
-
-  var ds = new Date().yyyymmddhhmmss()
-  var param = ["PS",filePath,ds]
-  var query = "INSERT INTO Images(which,path,date) VALUES (?,?,?)"
-
-  con.query(query,param,function(err, result){
-    if(err)
-      console.log("error insert DB")
-  });
-}
-
-function getData(data,uniqueId){
-  data.forEach(function(result){
-    result.findElement(By.tagName("img")).getAttribute("src").then(function(src){
-      uniqueId++
-      download(src, "img"+uniqueId+".jpg", function(){
-        console.log("done")
-      });
-    })
-  })
-}
-
-function getRows(rows,uniqueId){
-  rows.forEach(function(row){
-    row.findElements(By.className("product-image__img product-image__img--main")).then(function(data){
-        getData(data,uniqueId)
-    })
-  })
-}
-
-// async function seleniumPs4(){
-//   deleteRows()
-//   var uniqueId = 0
-//   var ps4_xpath = '//div[@class="grid-cell-container"]'
-//   var grid_cell_className = "grid-cell-row__container"
-//   var image_product_className = "product-image__img product-image__img--main"
-//   var driver_url = 'https://store.playstation.com/ko-kr/grid/STORE-MSF86012-TOPSALESGAME/1'
-//
-//
-//
-//   driver.findElement(By.xpath(ps4_xpath)).then(function(elements){
-//     elements.findElements(By.className(grid_cell_className)).then(function(rows){
-//       getRows(rows, uniqueId)
-//     })
-//   })
-//
-//
-// }
-
-
-// function seleniumPs4(){
-//   deleteRows()
-//   var uniqueId = 0
-//   var ps4_xpath = '//div[@class="grid-cell-container"]'
-//   driver.get('https://store.playstation.com/ko-kr/grid/STORE-MSF86012-TOPSALESGAME/1');
-//   driver.manage().timeouts().implicitlyWait(10000);
-//   driver.findElement(By.xpath(ps4_xpath)).then(function(elems) {
-//
-//     elems.findElements(By.className("grid-cell-row__container")).then(function(rows){
-//       for(i=0;i<rows.length;i++){
-//         rows[i].findElements(By.className("product-image__img product-image__img--main")).then(function(data){
-//           data.forEach(function(result){
-//             result.findElement(By.tagName("img")).getAttribute("src").then(function(src){
-//               uniqueId++;
-//               download(src, "img"+uniqueId+".jpg", function(){
-//                 console.log("done")
-//               });
-//             });
-//           })
-//         });
-//       }
-//     });
-//   });
-//
-//   driver.quit();
-// }
-
-// seleniumPs4();
-
-// function keepalive() {
-//   con.query('SELECT 1', function(err, result) {
-//     if(err) return console.log(err);
-//     // Successul keepalive
-//   });
-// }
-// setInterval('keepalive()', 1000*60*5);
 
 app.use(function (req, res, next) {
     req.connection.setNoDelay(true)
@@ -303,7 +184,7 @@ app.post('/game/getSpinnerScrollPs4Data/', function(req,res, next){
 app.post('/game/getSearchPs4Data/', function(req,res, next){
   console.log("/game/getSearchPs4Data")
   var search = req.query.Search
-  query = "SELECT * FROM PS WHERE title LIKE ? or place LIKE ? ORDER BY id DESC LIMIT 15"
+  query = "SELECT * FROM PS WHERE title LIKE ? or place LIKE ? ORDER BY id DESC LIMIT 16"
 
   con.query(query,['%' + [search] + '%','%' + [search] + '%'],function(err,result,fields){
     if(err) return next(err);
@@ -315,7 +196,7 @@ app.post('/game/getSearchScrollPs4Data/', function(req,res, next){
   console.log("/game/getSearchScrollPs4Data")
   var id = req.query.Id
   var search = req.query.Search
-  query = "SELECT * FROM PS WHERE id < ? AND (title LIKE ? or place LIKE ?) ORDER BY id DESC LIMIT 15"
+  query = "SELECT * FROM PS WHERE id < ? AND (title LIKE ? or place LIKE ?) ORDER BY id DESC LIMIT 10"
   params = [id,'%' + search + '%','%' + search + '%']
   con.query(query,params,function(err,result,fields){
     if(err) return next(err);
@@ -387,7 +268,7 @@ app.post('/game/getSearchXboxData/', function(req,res, next){
   console.log("/game/getSearchXboxData")
 
   var search = req.query.Search
-  query = "SELECT * FROM XBOX WHERE title LIKE ? or place LIKE ? ORDER BY id DESC LIMIT 15"
+  query = "SELECT * FROM XBOX WHERE title LIKE ? or place LIKE ? ORDER BY id DESC LIMIT 16"
 
   con.query(query,['%' + [search] + '%','%' + [search] + '%'],function(err,result,fields){
     if(err) return next(err);
@@ -400,7 +281,7 @@ app.post('/game/getSearchScrollXboxData/', function(req,res, next){
 
   var id = req.query.Id
   var search = req.query.Search
-  query = "SELECT * FROM XBOX WHERE id < ? AND (title LIKE ? or place LIKE ?) ORDER BY id DESC LIMIT 15"
+  query = "SELECT * FROM XBOX WHERE id < ? AND (title LIKE ? or place LIKE ?) ORDER BY id DESC LIMIT 10"
   params = [id,'%' + search + '%','%' + search + '%']
   con.query(query,params,function(err,result,fields){
     if(err) return next(err);
@@ -477,7 +358,7 @@ app.post('/game/getSearchSwitchData/', function(req,res, next){
   console.log("/game/getSearchSwitchData")
 
   var search = req.query.Search
-  query = "SELECT * FROM SWITCH WHERE title LIKE ? or place LIKE ? ORDER BY id DESC LIMIT 15"
+  query = "SELECT * FROM SWITCH WHERE title LIKE ? or place LIKE ? ORDER BY id DESC LIMIT 16"
 
   con.query(query,['%' + [search] + '%','%' + [search] + '%'],function(err,result,fields){
     if(err) return next(err);
@@ -490,7 +371,7 @@ app.post('/game/getSearchScrollSwitchData/', function(req,res, next){
 
   var id = req.query.Id
   var search = req.query.Search
-  query = "SELECT * FROM SWITCH WHERE id < ? AND (title LIKE ? or place LIKE ?) ORDER BY id DESC LIMIT 15"
+  query = "SELECT * FROM SWITCH WHERE id < ? AND (title LIKE ? or place LIKE ?) ORDER BY id DESC LIMIT 10"
   params = [id,'%' + search + '%','%' + search + '%']
   con.query(query,params,function(err,result,fields){
     if(err) return next(err);
@@ -603,7 +484,7 @@ app.post('/board/getSearchBoardData/', function(req,res, next){
 
   var search = req.query.Search
 
-  query = "SELECT * FROM Reco WHERE title LIKE ? or review LIKE ? ORDER BY id DESC LIMIT 10"
+  query = "SELECT * FROM Reco WHERE title LIKE ? or review LIKE ? ORDER BY id DESC LIMIT 16"
   con.query(query,['%' + [search] + '%','%' + [search] + '%'],function(err,result,fields){
     if(err) return next(err);
     res.send(result)
@@ -670,5 +551,5 @@ app.use(function(err, req, res, next){
   res.send({ message : error.message })
 });
 
-app.listen(6327);
+app.listen(8001);
 // app.listen(6327);
